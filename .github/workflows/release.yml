@@ -1,0 +1,29 @@
+name: Выпуск
+
+# Метка vX.Y.Z → выпуск GitHub с архивом archives/ShareBox-Windows-X.Y.Z.zip.
+# ShareBox у студий качает обновление по ссылке на файл выпуска.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Выпуск с архивом
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          VER="${TAG#v}"
+          FILE="archives/ShareBox-Windows-${VER}.zip"
+          test -f "$FILE" || { echo "::error::Нет $FILE"; exit 1; }
+          NOTES="archives/ShareBox-Windows-${VER}.txt"
+          if [ -f "$NOTES" ]; then N="$(cat "$NOTES")"; else N="ShareBox ${VER}"; fi
+          gh release create "$TAG" "$FILE" --title "ShareBox ${VER}" --notes "$N"
