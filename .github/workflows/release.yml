@@ -1,12 +1,14 @@
 name: Выпуск
 
-# Метка vX.Y.Z → выпуск GitHub с архивом archives/ShareBox-Windows-X.Y.Z.zip.
-# ShareBox у студий качает обновление по ссылке на файл выпуска.
+# Новый архив archives/ShareBox-Windows-X.Y.Z.zip в main → выпуск GitHub vX.Y.Z
+# с этим архивом (если такого выпуска ещё нет). ShareBox у студий качает
+# обновление по ссылке на файл выпуска; заметки — archives/…-X.Y.Z.txt.
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+    paths: ['archives/**']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,14 +18,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Выпуск с архивом
+      - name: Выпуски для новых архивов
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
         run: |
-          VER="${TAG#v}"
-          FILE="archives/ShareBox-Windows-${VER}.zip"
-          test -f "$FILE" || { echo "::error::Нет $FILE"; exit 1; }
-          NOTES="archives/ShareBox-Windows-${VER}.txt"
-          if [ -f "$NOTES" ]; then N="$(cat "$NOTES")"; else N="ShareBox ${VER}"; fi
-          gh release create "$TAG" "$FILE" --title "ShareBox ${VER}" --notes "$N"
+          shopt -s nullglob
+          for FILE in archives/ShareBox-Windows-*.zip; do
+            VER="${FILE#archives/ShareBox-Windows-}"; VER="${VER%.zip}"
+            TAG="v${VER}"
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              echo "$TAG уже есть"; continue
+            fi
+            NOTES="archives/ShareBox-Windows-${VER}.txt"
+            if [ -f "$NOTES" ]; then N="$(cat "$NOTES")"; else N="ShareBox ${VER}"; fi
+            gh release create "$TAG" "$FILE" --target "$GITHUB_SHA" --title "ShareBox ${VER}" --notes "$N"
+            echo "Ссылка: https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/$(basename "$FILE")"
+          done
