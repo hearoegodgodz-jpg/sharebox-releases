@@ -1,0 +1,35 @@
+{
+  "environment": "Linux structural validation",
+  "version": "1.66.0",
+  "size": 19472920,
+  "sha256": "2dd7565b8e57e887065e604030fa70250c87832107aa6d1f6053811d5c0e06ad",
+  "files": 164,
+  "archiveCrc": true,
+  "fullRuntime": true,
+  "legacyUpdateKeepsRuntime": true,
+  "signatures": "PE digest + issuer chain + trusted timestamp checked for 30 runtime files; CRL online check unavailable",
+  "nativeWindowsVerified": false,
+  "wine": {
+    "environment": "Wine 10 on Linux; not native Windows",
+    "nativeWindowsVerified": false,
+    "checks": [
+      {
+        "folder": "ShareBox",
+        "image": "ShareBox.exe",
+        "health": true,
+        "processImage": true,
+        "cleanStop": true,
+        "cmdExit": 0
+      },
+      {
+        "folder": "Legacy studio with spaces",
+        "image": "pythonw.exe",
+        "health": true,
+        "processImage": true,
+        "cleanStop": true,
+        "cmdExit": 0
+      }
+    ],
+    "version": "1.66.0.0"
+  }
+}
